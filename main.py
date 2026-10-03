@@ -40,3 +40,9 @@ print(segmento.shape)
 archivo_csv.graficar(
     1, "Fz", "C3", "C4", "ERP_02_condicion1.png"
 )
+
+# Calculamos C3 menos C4 y revisamos la condicion 1
+resultado = archivo_csv.crear_diferencia(1, "C3", "C4")
+
+print("\nDiferencia entre C3 y C4 en microvoltios")
+print(resultado.head())

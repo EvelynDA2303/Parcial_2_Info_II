@@ -117,6 +117,23 @@ class ArchivoCSV:
         plt.show()
         plt.close(figura)
 
+    def crear_diferencia(self, condicion, canal_a, canal_b):
+        # Validamos los canales y la condicion con el metodo anterior
+        self.seleccionar_canal(condicion, canal_a)
+        self.seleccionar_canal(condicion, canal_b)
+
+        # Guardamos la diferencia en una nueva columna de la tabla
+        nombre_columna = f"diferencia_{canal_a}_{canal_b}"
+        self.datos[nombre_columna] = (
+            self.datos[canal_a] - self.datos[canal_b]
+        )
+
+        # Devolvemos los datos de la condicion que queremos revisar
+        datos_condicion = self.seleccionar_condicion(condicion)
+
+        return datos_condicion[[canal_a, canal_b, nombre_columna]]
+
+
 
 class ArchivoMAT:
     def __init__(self, ruta):
