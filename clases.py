@@ -24,3 +24,15 @@ class ArchivoCSV:
         informacion += estadisticas.to_string()
 
         return informacion
+
+    def establecer_indice_tiempo(self):
+        # Revisamos si ya tenemos el tiempo como indice
+        if self.datos.index.name == "time_ms":
+            return
+
+        # Verificamos que el archivo tenga la columna de tiempo
+        if "time_ms" not in self.datos.columns:
+            raise ValueError("El archivo no tiene la columna time_ms")
+
+        # Usamos el tiempo en milisegundos como referencia de cada fila
+        self.datos = self.datos.set_index("time_ms")
