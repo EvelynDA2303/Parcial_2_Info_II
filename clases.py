@@ -49,3 +49,47 @@ class ArchivoMAT:
             (canales, puntos * ensayos),
             order="F"
         ).copy()
+
+    def seleccionar_segmento(self, canales, punto_inicial, punto_final):
+        # Antes de seleccionar el segmento debemos convertir la matriz a 2D
+        total_canales, total_puntos = self.matriz_2d.shape
+
+        # Revisamos que se hayan elegido cuatro canales
+        if len(canales) != 4:
+            raise ValueError("Debes seleccionar cuatro canales")
+
+        # Comprobamos que los canales sean enteros y esten dentro del rango
+        canales_revisados = []
+
+        for canal in canales:
+            if type(canal) != int:
+                raise ValueError("Los canales deben ser numeros enteros")
+
+            if canal < 0 or canal >= total_canales:
+                raise ValueError(
+                    f"Los canales deben estar entre 0 y {total_canales - 1}"
+                )
+
+            if canal in canales_revisados:
+                raise ValueError("Selecciona cuatro canales diferentes")
+
+            canales_revisados.append(canal)
+
+        # Los limites deben ser enteros para usarlos como indices
+        if type(punto_inicial) != int or type(punto_final) != int:
+            raise ValueError("Los limites deben ser numeros enteros")
+
+        # Revisamos que el intervalo tenga datos y no salga de la matriz
+        if punto_inicial < 0 or punto_final > total_puntos:
+            raise ValueError(
+                f"El intervalo debe estar entre 0 y {total_puntos}"
+            )
+
+        if punto_inicial >= punto_final:
+            raise ValueError("El punto inicial debe ser menor que el final")
+
+        # Tomamos los cuatro canales dentro del intervalo elegido
+        # Incluimos el punto inicial y dejamos por fuera el punto final
+        segmento = self.matriz_2d[canales, punto_inicial:punto_final]
+
+        return segmento
