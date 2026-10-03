@@ -35,3 +35,8 @@ segmento = archivo_mat.seleccionar_segmento([0, 1, 2, 3], 0, 250)
 
 print("\nDimensiones del segmento")
 print(segmento.shape)
+
+# Graficamos Fz y comparamos los canales C3 y C4
+archivo_csv.graficar(
+    1, "Fz", "C3", "C4", "ERP_02_condicion1.png"
+)

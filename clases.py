@@ -1,5 +1,8 @@
 ﻿import pandas as pd
 from io import StringIO
+import matplotlib.pyplot as plt
+import scipy.io as sio
+import numpy as np
 
 
 class ArchivoCSV:
@@ -74,9 +77,45 @@ class ArchivoCSV:
         # Devolvemos los valores del canal con sus tiempos
         return datos_condicion[canal].copy()
 
+    def graficar(self, condicion, canal, canal_x, canal_y, nombre_imagen):
+        # Elegimos la senal y los dos canales que vamos a comparar
+        senal = self.seleccionar_canal(condicion, canal)
+        senal_x = self.seleccionar_canal(condicion, canal_x)
+        senal_y = self.seleccionar_canal(condicion, canal_y)
 
-import scipy.io as sio
-import numpy as np
+        # Creamos una figura con un espacio grande arriba y dos abajo
+        figura = plt.figure(figsize=(12, 8))
+
+        # Mostramos la senal en el tiempo con un grafico de tallos
+        eje1 = figura.add_subplot(2, 2, (1, 2))
+        eje1.stem(senal.index, senal.values, markerfmt=".")
+        eje1.axvline(
+            0, color="red", linestyle="--", label="Tiempo cero"
+        )
+        eje1.set_title(f"Canal {canal} - Condicion {condicion}")
+        eje1.set_xlabel("Tiempo (ms)")
+        eje1.set_ylabel("Amplitud (µV)")
+        eje1.legend()
+
+        # Contamos cuantas muestras caen en cada intervalo de amplitud
+        eje2 = figura.add_subplot(2, 2, 3)
+        eje2.hist(senal.values, bins=30, edgecolor="black")
+        eje2.set_title(f"Histograma del canal {canal}")
+        eje2.set_xlabel("Amplitud (µV)")
+        eje2.set_ylabel("Cantidad de muestras")
+
+        # Cada punto compara los dos canales en el mismo instante
+        eje3 = figura.add_subplot(2, 2, 4)
+        eje3.scatter(senal_x.values, senal_y.values, s=8, alpha=0.5)
+        eje3.set_title(f"Relacion entre {canal_x} y {canal_y}")
+        eje3.set_xlabel(f"{canal_x} (µV)")
+        eje3.set_ylabel(f"{canal_y} (µV)")
+
+        # Ajustamos los espacios y guardamos antes de mostrar la figura
+        figura.tight_layout()
+        figura.savefig(nombre_imagen, dpi=150)
+        plt.show()
+        plt.close(figura)
 
 
 class ArchivoMAT:
