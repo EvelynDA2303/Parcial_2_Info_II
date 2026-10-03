@@ -36,3 +36,21 @@ class ArchivoCSV:
 
         # Usamos el tiempo en milisegundos como referencia de cada fila
         self.datos = self.datos.set_index("time_ms")
+
+    def seleccionar_condicion(self, condicion):
+        # Revisamos que la condicion sea una de las opciones permitidas
+        if type(condicion) != int or condicion not in (1, 2, 3):
+            raise ValueError("La condicion debe ser 1, 2 o 3")
+
+        if "condition" not in self.datos.columns:
+            raise ValueError("El archivo no tiene la columna condition")
+
+        # Tomamos solo las filas de la condicion elegida
+        datos_condicion = self.datos[
+            self.datos["condition"] == condicion
+        ].copy()
+
+        if datos_condicion.empty:
+            raise ValueError("No hay datos para esa condicion")
+
+        return datos_condicion
