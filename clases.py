@@ -54,3 +54,22 @@ class ArchivoCSV:
             raise ValueError("No hay datos para esa condicion")
 
         return datos_condicion
+
+    def seleccionar_canal(self, condicion, canal):
+        # Estos son los canales de los archivos ERP
+        canales = ["Fz", "FCz", "Cz", "FC3", "FC4",
+                   "C3", "C4", "CP3", "CP4"]
+
+        # Evitamos elegir columnas como subject o condition
+        if canal not in canales:
+            raise ValueError("El nombre no corresponde a un canal valido")
+
+        if canal not in self.datos.columns:
+            raise ValueError("El canal no existe en este archivo")
+
+        # Dejamos el tiempo como indice y filtramos la condicion
+        self.establecer_indice_tiempo()
+        datos_condicion = self.seleccionar_condicion(condicion)
+
+        # Devolvemos los valores del canal con sus tiempos
+        return datos_condicion[canal].copy()

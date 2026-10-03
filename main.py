@@ -26,3 +26,15 @@ print(datos_condicion["condition"].unique())
 
 print("\nCantidad de filas seleccionadas")
 print(len(datos_condicion))
+
+# Probamos el canal Fz de la condicion 1
+senal = archivo.seleccionar_canal(1, "Fz")
+
+print("\nCanal seleccionado")
+print(senal.name)
+
+print("\nPrimeros valores de la senal")
+print(senal.head())
+
+print("\nCantidad de muestras")
+print(len(senal))
