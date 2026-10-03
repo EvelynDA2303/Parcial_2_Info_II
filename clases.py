@@ -15,3 +15,15 @@ class ArchivoMAT:
             informacion += f"Tipo de dato: {tipo}\n"
 
         return informacion
+    
+    def seleccionar_matriz(self, nombre_variable):
+        if nombre_variable not in self.datos:
+            raise ValueError("La variable no existe en el archivo.")
+
+        matriz = self.datos[nombre_variable]
+
+        if getattr(matriz, "ndim", None) != 3:
+            raise ValueError("La variable debe ser una matriz de 3 dimensiones.")
+
+        self.nombre_variable = nombre_variable
+        self.matriz_3d = matriz
