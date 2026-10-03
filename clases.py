@@ -13,9 +13,14 @@ class ArchivoCSV:
         contenido = StringIO()
         self.datos.info(buf=contenido)
 
-        # Organizamos la informacion para mostrarla al imprimir el objeto
+        # Organizamos la informacion general del archivo
         informacion = f"Archivo: {self.ruta}\n\n"
         informacion += "Informacion general del CSV\n"
         informacion += contenido.getvalue()
+
+        # Agregamos las estadisticas de las columnas numericas
+        estadisticas = self.datos.describe()
+        informacion += "\nEstadisticas del CSV\n"
+        informacion += estadisticas.to_string()
 
         return informacion
