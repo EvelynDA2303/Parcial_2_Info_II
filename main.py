@@ -1,40 +1,37 @@
-from clases import ArchivoCSV
+from clases import ArchivoCSV, ArchivoMAT
 
 
-# Cargamos el CSV para revisar su informacion
-archivo = ArchivoCSV("ERP_02.csv")
+# Probamos el canal Fz de la condicion 1 del CSV
+archivo_csv = ArchivoCSV("ERP_02.csv")
+print(archivo_csv)
 
-# Mostramos la informacion general y las estadisticas
-print(archivo)
+senal = archivo_csv.seleccionar_canal(1, "Fz")
 
-# Ponemos el tiempo como indice de la tabla
-archivo.establecer_indice_tiempo()
-
-# Revisamos las primeras filas con el nuevo indice
-print("\nTabla con el tiempo como indice")
-print(archivo.datos.head())
-
-# Elegimos la condicion 1 para probar el filtro
-datos_condicion = archivo.seleccionar_condicion(1)
-
-# Revisamos las primeras filas y las condiciones que quedaron
-print("\nDatos de la condicion seleccionada")
-print(datos_condicion.head())
-
-print("\nCondiciones presentes")
-print(datos_condicion["condition"].unique())
-
-print("\nCantidad de filas seleccionadas")
-print(len(datos_condicion))
-
-# Probamos el canal Fz de la condicion 1
-senal = archivo.seleccionar_canal(1, "Fz")
-
-print("\nCanal seleccionado")
-print(senal.name)
-
-print("\nPrimeros valores de la senal")
+print("\nPrimeros valores del canal Fz")
 print(senal.head())
 
 print("\nCantidad de muestras")
 print(len(senal))
+
+
+# Cargamos el MAT y revisamos su informacion
+archivo_mat = ArchivoMAT("Sensitive_Cue.mat")
+print("\nInformacion del archivo MAT")
+print(archivo_mat)
+
+# Elegimos la matriz y conservamos sus dimensiones originales
+archivo_mat.seleccionar_matriz("Sensitive")
+
+print("\nDimensiones originales")
+print(archivo_mat.matriz_3d.shape)
+
+# Convertimos la matriz para seleccionar un segmento
+archivo_mat.convertir_a_2d()
+
+print("\nDimensiones en 2D")
+print(archivo_mat.matriz_2d.shape)
+
+segmento = archivo_mat.seleccionar_segmento([0, 1, 2, 3], 0, 250)
+
+print("\nDimensiones del segmento")
+print(segmento.shape)
