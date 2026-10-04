@@ -80,3 +80,13 @@ print(producto[:5])
 # Cada operacion debe devolver una senal de 250 muestras
 print("\nDimensiones de los resultados")
 print(suma.shape, resta.shape, producto.shape)
+
+# Graficamos los cuatro canales y su suma en las primeras 250 muestras
+# Guardamos la figura para incluirla en la entrega
+archivo_mat.graficar_operacion(
+    sumar_canales,
+    [0, 1, 2, 3],
+    0,
+    250,
+    "Sensitive_suma.png"
+)

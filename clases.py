@@ -249,6 +249,77 @@ class ArchivoMAT:
 
         # Devolvemos la senal calculada para mostrarla o graficarla despues
         return resultado
+        
+    def graficar_operacion(self, operacion, canales, punto_inicial,
+                           punto_final, nombre_imagen):
+        # Calculamos el resultado con el metodo que ya probamos
+        # Tambien se revisan los canales y los limites del intervalo
+        resultado = self.operar_canales(
+            operacion, canales, punto_inicial, punto_final
+        )
+
+        # Recuperamos las mismas muestras para mostrar los canales originales
+        segmento = self.seleccionar_segmento(
+            canales, punto_inicial, punto_final
+        )
+
+        # Convertimos los indices de las muestras a segundos
+        # Usamos la frecuencia de muestreo de 250 Hz indicada en el parcial
+        tiempo = np.arange(punto_inicial, punto_final) / 250
+
+        # Identificamos la operacion para colocar su nombre y sus unidades
+        if operacion == sumar_canales:
+            nombre_operacion = "Suma"
+            unidad = "µV"
+        elif operacion == restar_canales:
+            nombre_operacion = "Resta"
+            unidad = "µV"
+        elif operacion == multiplicar_canales:
+            nombre_operacion = "Producto"
+            unidad = "µV⁴"
+        else:
+            raise ValueError("La operacion no corresponde a las disponibles")
+
+        # Creamos una figura con dos graficas una debajo de la otra
+        figura = plt.figure(figsize=(12, 8))
+        eje1 = figura.add_subplot(2, 1, 1)
+        eje2 = figura.add_subplot(2, 1, 2)
+
+        # Dibujamos los cuatro canales sobre el mismo eje
+        # Usamos los indices originales para identificar cada canal
+        for posicion in range(4):
+            eje1.plot(
+                tiempo,
+                segmento[posicion],
+                label=f"Canal {canales[posicion]}"
+            )
+
+        eje1.set_title(f"Canales seleccionados de {self.nombre_variable}")
+        eje1.set_xlabel("Tiempo (s)")
+        eje1.set_ylabel("Amplitud (µV)")
+        eje1.legend()
+        eje1.grid(True)
+
+        # Mostramos la senal que obtuvimos al operar los cuatro canales
+        eje2.plot(
+            tiempo,
+            resultado,
+            color="purple",
+            label=nombre_operacion
+        )
+
+        eje2.set_title(f"{nombre_operacion} de los cuatro canales")
+        eje2.set_xlabel("Tiempo (s)")
+        eje2.set_ylabel(f"Resultado ({unidad})")
+        eje2.legend()
+        eje2.grid(True)
+
+        # Ajustamos los espacios y guardamos la figura antes de mostrarla
+        figura.tight_layout()
+        figura.savefig(nombre_imagen, dpi=150)
+        plt.show()
+        plt.close(figura)
+    
 
 def sumar_canales(a, b, c, d):
     # Cada parametro contiene las muestras de uno de los canales
