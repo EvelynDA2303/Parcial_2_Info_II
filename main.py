@@ -90,3 +90,9 @@ archivo_mat.graficar_operacion(
     250,
     "Sensitive_suma.png"
 )
+
+# Calculamos las estadisticas sobre muestras y ensayos
+# Al reducir los ejes 1 y 2 queda un resultado por cada canal
+archivo_mat.graficar_estadisticas(
+    1, 2, "Sensitive_estadisticas.png"
+)

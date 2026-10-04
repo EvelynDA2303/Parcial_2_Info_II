@@ -319,6 +319,60 @@ class ArchivoMAT:
         figura.savefig(nombre_imagen, dpi=150)
         plt.show()
         plt.close(figura)
+
+    def calcular_estadisticas(self, eje_a, eje_b):
+        # Revisamos que los ejes sean numeros enteros
+        if type(eje_a) != int or type(eje_b) != int:
+            raise ValueError("Los ejes deben ser numeros enteros")
+
+        # La matriz original tiene tres ejes identificados como 0, 1 y 2
+        if eje_a not in (0, 1, 2) or eje_b not in (0, 1, 2):
+            raise ValueError("Los ejes deben estar entre 0 y 2")
+
+        # Necesitamos dos ejes diferentes para obtener un vector
+        if eje_a == eje_b:
+            raise ValueError("Debes elegir dos ejes diferentes")
+
+        # Trabajamos sobre la matriz original sin convertirla a 2D
+        # Calculamos ambas estadisticas sobre los mismos dos ejes
+        ejes = (eje_a, eje_b)
+        promedio = np.mean(self.matriz_3d, axis=ejes)
+        desviacion = np.std(self.matriz_3d, axis=ejes)
+
+        # Devolvemos los vectores para mostrarlos y graficarlos
+        return promedio, desviacion
+
+    def graficar_estadisticas(self, eje_a, eje_b, nombre_imagen):
+        # Calculamos las estadisticas con los ejes seleccionados
+        promedio, desviacion = self.calcular_estadisticas(eje_a, eje_b)
+
+        # Mostramos las dimensiones para revisar que obtuvimos dos vectores
+        print("\nForma del vector de promedios")
+        print(promedio.shape)
+
+        print("\nForma del vector de desviaciones")
+        print(desviacion.shape)
+
+        # Dibujamos las dos distribuciones en un mismo eje
+        figura = plt.figure(figsize=(8, 6))
+        eje = figura.add_subplot(1, 1, 1)
+        eje.boxplot([promedio, desviacion])
+
+        # Identificamos cada caja y las unidades de los resultados
+        eje.set_xticks([1, 2])
+        eje.set_xticklabels(["Promedio", "Desviacion estandar"])
+        eje.set_ylabel("Amplitud (µV)")
+        eje.set_title(
+            f"Estadisticas de {self.nombre_variable} sobre los ejes "
+            f"{eje_a} y {eje_b}"
+        )
+        eje.grid(True, axis="y")
+
+        # Guardamos la figura antes de mostrarla
+        figura.tight_layout()
+        figura.savefig(nombre_imagen, dpi=150)
+        plt.show()
+        plt.close(figura)
     
 
 def sumar_canales(a, b, c, d):
