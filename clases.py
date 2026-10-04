@@ -4,6 +4,24 @@ import matplotlib.pyplot as plt
 import scipy.io as sio
 import numpy as np
 
+def leer_entero(mensaje, minimo, maximo):
+    # Repetimos la pregunta hasta recibir un numero permitido
+    while True:
+        try:
+            # Convertimos lo que escribe la persona a un numero entero
+            numero = int(input(mensaje))
+
+            # Devolvemos el numero si esta dentro del rango
+            if minimo <= numero <= maximo:
+                return numero
+
+            # Avisamos cuando el numero no corresponde a las opciones
+            print(f"Ingresa un numero entre {minimo} y {maximo}")
+
+        except ValueError:
+            # Si escribe letras o decimales volvemos a preguntar
+            print("Debes ingresar un numero entero")
+
 
 class ArchivoCSV:
     def __init__(self, ruta):
