@@ -1,98 +1,142 @@
-from clases import ArchivoCSV, ArchivoMAT
+from pathlib import Path
+from clases import ArchivoMAT, leer_entero
 from clases import sumar_canales, restar_canales, multiplicar_canales
 
 
-# Probamos el canal Fz de la condicion 1 del CSV
-archivo_csv = ArchivoCSV("ERP_02.csv")
-print(archivo_csv)
+def menu_mat():
+    # Al comenzar no tenemos ningun archivo cargado
+    archivo = None
 
-senal = archivo_csv.seleccionar_canal(1, "Fz")
+    # Mantenemos el menu activo hasta elegir salir
+    while True:
+        print("\nMENU DE ARCHIVOS MAT")
+        print("1 Cargar un archivo MAT")
+        print("2 Mostrar informacion del archivo")
+        print("3 Operar y graficar cuatro canales")
+        print("4 Calcular y graficar estadisticas")
+        print("0 Salir")
 
-print("\nPrimeros valores del canal Fz")
-print(senal.head())
+        opcion = leer_entero("Elige una opcion: ", 0, 4)
 
-print("\nCantidad de muestras")
-print(len(senal))
+        if opcion == 0:
+            break
+
+        try:
+            if opcion == 1:
+                # Permitimos escribir un nombre o una ruta completa
+                ruta = input("Nombre o ruta del archivo MAT: ").strip()
+                ruta = ruta.strip('"')
+
+                # Revisamos las variables antes de seleccionar la matriz
+                nuevo_archivo = ArchivoMAT(ruta)
+                print(nuevo_archivo)
+
+                variable = input("Nombre de la variable 3D: ").strip()
+                nuevo_archivo.seleccionar_matriz(variable)
+
+                # Cambiamos el archivo activo solo si la carga fue correcta
+                archivo = nuevo_archivo
+                print("Archivo y matriz seleccionados correctamente")
+
+            elif archivo is None:
+                print("Primero debes cargar un archivo con la opcion 1")
+
+            elif opcion == 2:
+                print(archivo)
+
+            elif opcion == 3:
+                # Elegimos la funcion que recibira el metodo de la clase
+                print("\n1 Suma")
+                print("2 Resta")
+                print("3 Multiplicacion")
+                eleccion = leer_entero("Elige la operacion: ", 1, 3)
+
+                if eleccion == 1:
+                    operacion = sumar_canales
+                    nombre_operacion = "suma"
+                elif eleccion == 2:
+                    operacion = restar_canales
+                    nombre_operacion = "resta"
+                else:
+                    operacion = multiplicar_canales
+                    nombre_operacion = "producto"
+
+                # Consultamos los limites reales de la matriz seleccionada
+                archivo.convertir_a_2d()
+                total_canales, total_puntos = archivo.matriz_2d.shape
+
+                if total_canales < 4:
+                    print("La matriz debe tener al menos cuatro canales")
+                    continue
+
+                # Pedimos cuatro canales diferentes y conservamos su orden
+                canales = []
+                print(f"Canales disponibles: 0 hasta {total_canales - 1}")
+
+                while len(canales) < 4:
+                    canal = leer_entero(
+                        f"Canal numero {len(canales) + 1}: ",
+                        0,
+                        total_canales - 1
+                    )
+
+                    if canal in canales:
+                        print("Ese canal ya fue elegido")
+                    else:
+                        canales.append(canal)
+
+                # El limite final no se incluye en el segmento
+                inicio = leer_entero(
+                    "Muestra inicial: ", 0, total_puntos - 1
+                )
+                final = leer_entero(
+                    "Limite final sin incluir: ", inicio + 1, total_puntos
+                )
+
+                # Construimos un nombre que identifica el archivo y la prueba
+                base = Path(archivo.ruta).stem
+                texto_canales = "_".join(str(canal) for canal in canales)
+
+                nombre_imagen = (
+                    f"{base}_{archivo.nombre_variable}_{nombre_operacion}"
+                    f"_canales_{texto_canales}_muestras_{inicio}_{final}.png"
+                )
+
+                archivo.graficar_operacion(
+                    operacion, canales, inicio, final, nombre_imagen
+                )
+                print(f"Imagen guardada en: {nombre_imagen}")
+
+            elif opcion == 4:
+                # Explicamos que representa cada eje antes de elegirlo
+                print("\nEje 0: canales")
+                print("Eje 1: muestras")
+                print("Eje 2: ensayos")
+
+                eje_a = leer_entero("Primer eje: ", 0, 2)
+                eje_b = leer_entero("Segundo eje: ", 0, 2)
+
+                while eje_a == eje_b:
+                    print("Los ejes deben ser diferentes")
+                    eje_b = leer_entero("Segundo eje: ", 0, 2)
+
+                # Incluimos los ejes elegidos en el nombre de la imagen
+                base = Path(archivo.ruta).stem
+                nombre_imagen = (
+                    f"{base}_{archivo.nombre_variable}"
+                    f"_estadisticas_ejes_{eje_a}_{eje_b}.png"
+                )
+
+                archivo.graficar_estadisticas(
+                    eje_a, eje_b, nombre_imagen
+                )
+                print(f"Imagen guardada en: {nombre_imagen}")
+
+        except (OSError, ValueError, NotImplementedError) as error:
+            # Mostramos el problema y permitimos volver a intentar
+            print(f"No se pudo completar la opcion: {error}")
 
 
-# Cargamos el MAT y revisamos su informacion
-archivo_mat = ArchivoMAT("Sensitive_Cue.mat")
-print("\nInformacion del archivo MAT")
-print(archivo_mat)
-
-# Elegimos la matriz y conservamos sus dimensiones originales
-archivo_mat.seleccionar_matriz("Sensitive")
-
-print("\nDimensiones originales")
-print(archivo_mat.matriz_3d.shape)
-
-# Convertimos la matriz para seleccionar un segmento
-archivo_mat.convertir_a_2d()
-
-print("\nDimensiones en 2D")
-print(archivo_mat.matriz_2d.shape)
-
-segmento = archivo_mat.seleccionar_segmento([0, 1, 2, 3], 0, 250)
-
-print("\nDimensiones del segmento")
-print(segmento.shape)
-
-# Graficamos Fz y comparamos los canales C3 y C4
-archivo_csv.graficar(
-    1, "Fz", "C3", "C4", "ERP_02_condicion1.png"
-)
-
-# Calculamos C3 menos C4 y revisamos la condicion 1
-resultado = archivo_csv.crear_diferencia(1, "C3", "C4")
-
-print("\nDiferencia entre C3 y C4 en microvoltios")
-print(resultado.head())
-
-# Usamos los canales 0, 1, 2 y 3 para probar las tres operaciones
-# El intervalo incluye la muestra 0 hasta la 249, la 250 no se incluye
-
-# Pasamos la funcion sumar_canales sin parentesis
-# El metodo operar_canales se encarga de ejecutarla con los datos
-suma = archivo_mat.operar_canales(
-    sumar_canales, [0, 1, 2, 3], 0, 250
-)
-
-# Conservamos el mismo orden de canales para calcular la resta
-resta = archivo_mat.operar_canales(
-    restar_canales, [0, 1, 2, 3], 0, 250
-)
-
-# Multiplicamos los cuatro canales en ese mismo intervalo
-producto = archivo_mat.operar_canales(
-    multiplicar_canales, [0, 1, 2, 3], 0, 250
-)
-
-# Mostramos solo cinco valores de cada resultado para revisar la salida
-print("\nPrimeras cinco muestras de la suma")
-print(suma[:5])
-
-print("\nPrimeras cinco muestras de la resta")
-print(resta[:5])
-
-print("\nPrimeras cinco muestras del producto")
-print(producto[:5])
-
-# Cada operacion debe devolver una senal de 250 muestras
-print("\nDimensiones de los resultados")
-print(suma.shape, resta.shape, producto.shape)
-
-# Graficamos los cuatro canales y su suma en las primeras 250 muestras
-# Guardamos la figura para incluirla en la entrega
-archivo_mat.graficar_operacion(
-    sumar_canales,
-    [0, 1, 2, 3],
-    0,
-    250,
-    "Sensitive_suma.png"
-)
-
-# Calculamos las estadisticas sobre muestras y ensayos
-# Al reducir los ejes 1 y 2 queda un resultado por cada canal
-archivo_mat.graficar_estadisticas(
-    1, 2, "Sensitive_estadisticas.png"
-)
+# Iniciamos el menu cuando ejecutamos este archivo
+if __name__ == "__main__":
+    menu_mat()

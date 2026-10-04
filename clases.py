@@ -391,3 +391,18 @@ def multiplicar_canales(a, b, c, d):
     # Multiplicamos los valores que estan en la misma posicion
     # Obtenemos un resultado por cada muestra del intervalo
     return a * b * c * d
+
+def leer_entero(mensaje, minimo, maximo):
+    # Repetimos la pregunta hasta recibir un entero dentro del rango
+    while True:
+        try:
+            valor = int(input(mensaje))
+        except ValueError:
+            print("Debes escribir un numero entero")
+            continue
+
+        # Devolvemos el numero solo cuando esta dentro de los limites
+        if minimo <= valor <= maximo:
+            return valor
+
+        print(f"El numero debe estar entre {minimo} y {maximo}")
