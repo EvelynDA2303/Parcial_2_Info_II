@@ -244,3 +244,183 @@ class ArchivoMAT:
         segmento = self.matriz_2d[canales, punto_inicial:punto_final]
 
         return segmento
+
+    def operar_canales(self, operacion, canales, punto_inicial, punto_final):
+        # Convertimos la matriz 3D para tener los canales en las filas
+        # y las muestras de los ensayos seguidas en las columnas
+        self.convertir_a_2d()
+
+        # Seleccionamos los cuatro canales y el intervalo solicitado
+        # Este metodo tambien revisa que los canales y limites sean validos
+        segmento = self.seleccionar_segmento(
+            canales, punto_inicial, punto_final
+        )
+
+        # Cada fila del segmento corresponde a uno de los canales elegidos
+        # Pasamos esas filas a la funcion de suma, resta o multiplicacion
+        resultado = operacion(
+            segmento[0],
+            segmento[1],
+            segmento[2],
+            segmento[3]
+        )
+
+        # Devolvemos la senal calculada para mostrarla o graficarla despues
+        return resultado
+        
+    def graficar_operacion(self, operacion, canales, punto_inicial,
+                           punto_final, nombre_imagen):
+        # Calculamos el resultado con el metodo que ya probamos
+        # Tambien se revisan los canales y los limites del intervalo
+        resultado = self.operar_canales(
+            operacion, canales, punto_inicial, punto_final
+        )
+
+        # Recuperamos las mismas muestras para mostrar los canales originales
+        segmento = self.seleccionar_segmento(
+            canales, punto_inicial, punto_final
+        )
+
+        # Convertimos los indices de las muestras a segundos
+        # Usamos la frecuencia de muestreo de 250 Hz indicada en el parcial
+        tiempo = np.arange(punto_inicial, punto_final) / 250
+
+        # Identificamos la operacion para colocar su nombre y sus unidades
+        if operacion == sumar_canales:
+            nombre_operacion = "Suma"
+            unidad = "µV"
+        elif operacion == restar_canales:
+            nombre_operacion = "Resta"
+            unidad = "µV"
+        elif operacion == multiplicar_canales:
+            nombre_operacion = "Producto"
+            unidad = "µV⁴"
+        else:
+            raise ValueError("La operacion no corresponde a las disponibles")
+
+        # Creamos una figura con dos graficas una debajo de la otra
+        figura = plt.figure(figsize=(12, 8))
+        eje1 = figura.add_subplot(2, 1, 1)
+        eje2 = figura.add_subplot(2, 1, 2)
+
+        # Dibujamos los cuatro canales sobre el mismo eje
+        # Usamos los indices originales para identificar cada canal
+        for posicion in range(4):
+            eje1.plot(
+                tiempo,
+                segmento[posicion],
+                label=f"Canal {canales[posicion]}"
+            )
+
+        eje1.set_title(f"Canales seleccionados de {self.nombre_variable}")
+        eje1.set_xlabel("Tiempo (s)")
+        eje1.set_ylabel("Amplitud (µV)")
+        eje1.legend()
+        eje1.grid(True)
+
+        # Mostramos la senal que obtuvimos al operar los cuatro canales
+        eje2.plot(
+            tiempo,
+            resultado,
+            color="purple",
+            label=nombre_operacion
+        )
+
+        eje2.set_title(f"{nombre_operacion} de los cuatro canales")
+        eje2.set_xlabel("Tiempo (s)")
+        eje2.set_ylabel(f"Resultado ({unidad})")
+        eje2.legend()
+        eje2.grid(True)
+
+        # Ajustamos los espacios y guardamos la figura antes de mostrarla
+        figura.tight_layout()
+        figura.savefig(nombre_imagen, dpi=150)
+        plt.show()
+        plt.close(figura)
+
+    def calcular_estadisticas(self, eje_a, eje_b):
+        # Revisamos que los ejes sean numeros enteros
+        if type(eje_a) != int or type(eje_b) != int:
+            raise ValueError("Los ejes deben ser numeros enteros")
+
+        # La matriz original tiene tres ejes identificados como 0, 1 y 2
+        if eje_a not in (0, 1, 2) or eje_b not in (0, 1, 2):
+            raise ValueError("Los ejes deben estar entre 0 y 2")
+
+        # Necesitamos dos ejes diferentes para obtener un vector
+        if eje_a == eje_b:
+            raise ValueError("Debes elegir dos ejes diferentes")
+
+        # Trabajamos sobre la matriz original sin convertirla a 2D
+        # Calculamos ambas estadisticas sobre los mismos dos ejes
+        ejes = (eje_a, eje_b)
+        promedio = np.mean(self.matriz_3d, axis=ejes)
+        desviacion = np.std(self.matriz_3d, axis=ejes)
+
+        # Devolvemos los vectores para mostrarlos y graficarlos
+        return promedio, desviacion
+
+    def graficar_estadisticas(self, eje_a, eje_b, nombre_imagen):
+        # Calculamos las estadisticas con los ejes seleccionados
+        promedio, desviacion = self.calcular_estadisticas(eje_a, eje_b)
+
+        # Mostramos las dimensiones para revisar que obtuvimos dos vectores
+        print("\nForma del vector de promedios")
+        print(promedio.shape)
+
+        print("\nForma del vector de desviaciones")
+        print(desviacion.shape)
+
+        # Dibujamos las dos distribuciones en un mismo eje
+        figura = plt.figure(figsize=(8, 6))
+        eje = figura.add_subplot(1, 1, 1)
+        eje.boxplot([promedio, desviacion])
+
+        # Identificamos cada caja y las unidades de los resultados
+        eje.set_xticks([1, 2])
+        eje.set_xticklabels(["Promedio", "Desviacion estandar"])
+        eje.set_ylabel("Amplitud (µV)")
+        eje.set_title(
+            f"Estadisticas de {self.nombre_variable} sobre los ejes "
+            f"{eje_a} y {eje_b}"
+        )
+        eje.grid(True, axis="y")
+
+        # Guardamos la figura antes de mostrarla
+        figura.tight_layout()
+        figura.savefig(nombre_imagen, dpi=150)
+        plt.show()
+        plt.close(figura)
+    
+
+def sumar_canales(a, b, c, d):
+    # Cada parametro contiene las muestras de uno de los canales
+    # Sumamos los valores que estan en la misma posicion
+    return a + b + c + d
+
+
+def restar_canales(a, b, c, d):
+    # Tomamos el primer canal como base y le restamos los otros tres
+    # El orden en que elegimos los canales cambia el resultado
+    return a - b - c - d
+
+
+def multiplicar_canales(a, b, c, d):
+    # Multiplicamos los valores que estan en la misma posicion
+    # Obtenemos un resultado por cada muestra del intervalo
+    return a * b * c * d
+
+def leer_entero(mensaje, minimo, maximo):
+    # Repetimos la pregunta hasta recibir un entero dentro del rango
+    while True:
+        try:
+            valor = int(input(mensaje))
+        except ValueError:
+            print("Debes escribir un numero entero")
+            continue
+
+        # Devolvemos el numero solo cuando esta dentro de los limites
+        if minimo <= valor <= maximo:
+            return valor
+
+        print(f"El numero debe estar entre {minimo} y {maximo}")
