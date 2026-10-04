@@ -226,3 +226,43 @@ class ArchivoMAT:
         segmento = self.matriz_2d[canales, punto_inicial:punto_final]
 
         return segmento
+
+    def operar_canales(self, operacion, canales, punto_inicial, punto_final):
+        # Convertimos la matriz 3D para tener los canales en las filas
+        # y las muestras de los ensayos seguidas en las columnas
+        self.convertir_a_2d()
+
+        # Seleccionamos los cuatro canales y el intervalo solicitado
+        # Este metodo tambien revisa que los canales y limites sean validos
+        segmento = self.seleccionar_segmento(
+            canales, punto_inicial, punto_final
+        )
+
+        # Cada fila del segmento corresponde a uno de los canales elegidos
+        # Pasamos esas filas a la funcion de suma, resta o multiplicacion
+        resultado = operacion(
+            segmento[0],
+            segmento[1],
+            segmento[2],
+            segmento[3]
+        )
+
+        # Devolvemos la senal calculada para mostrarla o graficarla despues
+        return resultado
+
+def sumar_canales(a, b, c, d):
+    # Cada parametro contiene las muestras de uno de los canales
+    # Sumamos los valores que estan en la misma posicion
+    return a + b + c + d
+
+
+def restar_canales(a, b, c, d):
+    # Tomamos el primer canal como base y le restamos los otros tres
+    # El orden en que elegimos los canales cambia el resultado
+    return a - b - c - d
+
+
+def multiplicar_canales(a, b, c, d):
+    # Multiplicamos los valores que estan en la misma posicion
+    # Obtenemos un resultado por cada muestra del intervalo
+    return a * b * c * d

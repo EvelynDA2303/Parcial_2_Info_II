@@ -1,4 +1,5 @@
 from clases import ArchivoCSV, ArchivoMAT
+from clases import sumar_canales, restar_canales, multiplicar_canales
 
 
 # Probamos el canal Fz de la condicion 1 del CSV
@@ -46,3 +47,36 @@ resultado = archivo_csv.crear_diferencia(1, "C3", "C4")
 
 print("\nDiferencia entre C3 y C4 en microvoltios")
 print(resultado.head())
+
+# Usamos los canales 0, 1, 2 y 3 para probar las tres operaciones
+# El intervalo incluye la muestra 0 hasta la 249, la 250 no se incluye
+
+# Pasamos la funcion sumar_canales sin parentesis
+# El metodo operar_canales se encarga de ejecutarla con los datos
+suma = archivo_mat.operar_canales(
+    sumar_canales, [0, 1, 2, 3], 0, 250
+)
+
+# Conservamos el mismo orden de canales para calcular la resta
+resta = archivo_mat.operar_canales(
+    restar_canales, [0, 1, 2, 3], 0, 250
+)
+
+# Multiplicamos los cuatro canales en ese mismo intervalo
+producto = archivo_mat.operar_canales(
+    multiplicar_canales, [0, 1, 2, 3], 0, 250
+)
+
+# Mostramos solo cinco valores de cada resultado para revisar la salida
+print("\nPrimeras cinco muestras de la suma")
+print(suma[:5])
+
+print("\nPrimeras cinco muestras de la resta")
+print(resta[:5])
+
+print("\nPrimeras cinco muestras del producto")
+print(producto[:5])
+
+# Cada operacion debe devolver una senal de 250 muestras
+print("\nDimensiones de los resultados")
+print(suma.shape, resta.shape, producto.shape)
